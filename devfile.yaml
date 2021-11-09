@@ -18,7 +18,7 @@ components:
   -
     type: dockerimage
     alias: nodejs
-    image: quay.io/eclipse/che-nodejs10-community:nightly
+    image: registry.access.redhat.com/ubi8/nodejs-14:latest
     memoryLimit: 1Gi
     endpoints:
       - name: 'angular'
