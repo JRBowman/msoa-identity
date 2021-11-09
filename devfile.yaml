@@ -1,9 +1,7 @@
 ---
 apiVersion: 1.0.0
 metadata:
-  name: angular
-attributes:
-  persistVolumes: 'false'
+  name: angular-
 projects:
   - name: angular-ui
     source:
@@ -12,7 +10,6 @@ projects:
 components:
   - type: chePlugin
     id: vscode/typescript-language-features/latest
-    alias: typescript
   - type: dockerimage
     alias: nodejs
     image: 'registry.redhat.io/codeready-workspaces/plugin-java8-openj9-rhel8@sha256:01485e629dd61003368bc816480cc3537f7fdeac09756e5f2b3bb3e0a3786d61'
