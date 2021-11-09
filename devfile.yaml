@@ -5,20 +5,17 @@ metadata:
 attributes:
   persistVolumes: 'false'
 projects:
-  -
-    name: angular-ui
+  - name: angular-ui
     source:
       type: git
       location: "https://dev.azure.com/bowman-redhat/dotnet-msoa/_git/angular-ui"
 components:
-  -
-    type: chePlugin
+  - type: chePlugin
     id: vscode/typescript-language-features/latest
     alias: typescript
-  -
-    type: dockerimage
+  - type: dockerimage
     alias: nodejs
-    image: registry.access.redhat.com/ubi8/nodejs-14:latest
+    image: 'registry.redhat.io/codeready-workspaces/plugin-java8-openj9-rhel8@sha256:01485e629dd61003368bc816480cc3537f7fdeac09756e5f2b3bb3e0a3786d61'
     memoryLimit: 1Gi
     endpoints:
       - name: 'angular'
@@ -31,24 +28,15 @@ commands:
         component: nodejs
         command: npm install
         workdir: ${CHE_PROJECTS_ROOT}/angular-ui
-  -
-    name: build
+  - name: build
     actions:
       - type: exec
         component: nodejs
         command: npm run build
         workdir: ${CHE_PROJECTS_ROOT}/angular-ui
-  -
-    name: start
+  - name: start
     actions:
       - type: exec
         component: nodejs
         command: npm run start --host 0.0.0.0 --disableHostCheck true
-        workdir: ${CHE_PROJECTS_ROOT}/angular-ui
-  -
-    name: lint
-    actions:
-      - type: exec
-        component: nodejs
-        command: npm run lint
         workdir: ${CHE_PROJECTS_ROOT}/angular-ui
