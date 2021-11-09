@@ -1,64 +1,53 @@
+---
 apiVersion: 1.0.0
 metadata:
-  generateName: dotnet-
+  name: angular
+attributes:
+  persistVolumes: 'false'
 projects:
-  - name: dotnet-api
+  -
+    name: angular-ui
     source:
       type: git
-      location: 'https://dev.azure.com/bowman-redhat/dotnet-msoa/_git/identity-gateway'
+      location: "https://dev.azure.com/bowman-redhat/dotnet-msoa/_git/angular-ui"
 components:
-  - type: chePlugin
-    alias: omnisharp
-    id: redhat-developer/che-omnisharp-plugin/latest
-  - type: chePlugin
-    alias: netcoredbg
-    id: redhat-developer/netcoredbg-theia-plugin/latest
-  - type: dockerimage
-    alias: dotnet
-    image: 'registry.redhat.io/codeready-workspaces/stacks-dotnet-rhel8@sha256:60007e969d7e3dbc526f3be6b5ebb6aadac9018448c6f2d967ade8400d158531'
-    memoryLimit: 512Mi
+  -
+    type: chePlugin
+    id: che-incubator/typescript/latest
+  -
+    type: dockerimage
+    alias: nodejs
+    image: quay.io/eclipse/che-nodejs10-community:nightly
+    memoryLimit: 1Gi
     endpoints:
-      - name: main-endpoint
-        port: 5000
+      - name: 'angular'
+        port: 4200
     mountSources: true
-    volumes:
-      - name: nuget
-        containerPath: /home/jboss/.nuget
 commands:
-  - name: 1. Update dependencies
+  - name: yarn install
     actions:
       - type: exec
-        component: dotnet
-        command: dotnet restore
-        workdir: '${CHE_PROJECTS_ROOT}/Onbowman.MSOA.IdentityGateway'
-  - name: 2. Build
+        component: nodejs
+        command: npm install
+        workdir: ${CHE_PROJECTS_ROOT}/angular-ui
+  -
+    name: build
     actions:
       - type: exec
-        component: dotnet
-        command: dotnet build
-        workdir: '${CHE_PROJECTS_ROOT}/Onbowman.MSOA.IdentityGateway'
-  - name: 3. Run
+        component: nodejs
+        command: npm run build
+        workdir: ${CHE_PROJECTS_ROOT}/angular-ui
+  -
+    name: start
     actions:
       - type: exec
-        component: dotnet
-        command: dotnet run
-        workdir: '${CHE_PROJECTS_ROOT}/Onbowman.MSOA.IdentityGateway'
-  - name: Launch .net web application in debug mode
+        component: nodejs
+        command: npm run start --host 0.0.0.0 --disableHostCheck true
+        workdir: ${CHE_PROJECTS_ROOT}/angular-ui
+  -
+    name: lint
     actions:
-      - type: vscode-launch
-        referenceContent: |
-          {
-            "version": "0.2.0",
-              "configurations": [
-                 {
-                    "type": "netcoredbg",
-                    "request": "launch",
-                    "program": "/projects/Onbowman.MSOA.IdentityGateway/bin/Debug/net5.0/Onbowman.MSOA.IdentityGateway.dll",
-                    "args": [],
-                    "name": ".NET Core Launch (console)",
-                    "stopAtEntry": true,
-                    "preLaunchTask": "2. Build",
-                    "console": "internalConsole"
-                  }
-              ]
-          }
+      - type: exec
+        component: nodejs
+        command: npm run lint
+        workdir: ${CHE_PROJECTS_ROOT}/angular-ui
