@@ -13,7 +13,7 @@ projects:
 components:
   -
     type: chePlugin
-    id: typescript-language-features
+    id: vscode/typescript-language-features
   -
     type: dockerimage
     alias: nodejs
