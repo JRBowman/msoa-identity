@@ -13,7 +13,7 @@ projects:
 components:
   -
     type: chePlugin
-    id: che-incubator/typescript/latest
+    id: typescript-language-features
   -
     type: dockerimage
     alias: nodejs
