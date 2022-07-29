@@ -1,64 +1,58 @@
-apiVersion: 1.0.0
+schemaVersion: 2.1.0
 metadata:
   generateName: dotnet-
+  displayName: .NET 5.0
+  description: Stack with .NET 5.0
+  icon: https://github.com/dotnet/brand/raw/main/logo/dotnet-logo.png
+  language: dotnet
+  projectType: dotnet
+  tags:
+    - dotnet
+  version: 1.0.1
+
 projects:
-  - name: dotnet-api
-    source:
-      type: git
-      location: 'https://dev.azure.com/bowman-redhat/dotnet-msoa/_git/identity-gateway'
+  - name: dotnet-identity
+    git:
+      checkoutFrom:
+        remote: origin
+        revision: main
+      remotes:
+        origin: https://dev.azure.com/bowman-redhat/dotnet-msoa/_git/identity-gateway
+
 components:
-  - type: chePlugin
-    alias: omnisharp
-    id: redhat-developer/che-omnisharp-plugin/latest
-  - type: chePlugin
-    alias: netcoredbg
-    id: redhat-developer/netcoredbg-theia-plugin/latest
-  - type: dockerimage
-    alias: dotnet
-    image: 'registry.redhat.io/codeready-workspaces/stacks-dotnet-rhel8@sha256:60007e969d7e3dbc526f3be6b5ebb6aadac9018448c6f2d967ade8400d158531'
-    memoryLimit: 512Mi
-    endpoints:
-      - name: main-endpoint
-        port: 5000
+- name: dotnet
+  container:
+    image: registry.access.redhat.com/ubi8/dotnet-50:5.0
     mountSources: true
-    volumes:
-      - name: nuget
-        containerPath: /home/jboss/.nuget
+    env:
+      - name: CONFIGURATION
+        value: Debug
+      - name: STARTUP_PROJECT
+        value: app.csproj
+      - name: ASPNETCORE_ENVIRONMENT
+        value: Development
+      - name: ASPNETCORE_URLS
+        value: http://*:8080
+      - name: MSOA_ENABLE_TLS
+        value: false
+    endpoints:
+    - name: http-8080
+      targetPort: 8080
 commands:
-  - name: 1. Update dependencies
-    actions:
-      - type: exec
-        component: dotnet
-        command: dotnet restore
-        workdir: '${CHE_PROJECTS_ROOT}/Onbowman.MSOA.IdentityGateway'
-  - name: 2. Build
-    actions:
-      - type: exec
-        component: dotnet
-        command: dotnet build
-        workdir: '${CHE_PROJECTS_ROOT}/Onbowman.MSOA.IdentityGateway'
-  - name: 3. Run
-    actions:
-      - type: exec
-        component: dotnet
-        command: dotnet run
-        workdir: '${CHE_PROJECTS_ROOT}/Onbowman.MSOA.IdentityGateway'
-  - name: Launch .net web application in debug mode
-    actions:
-      - type: vscode-launch
-        referenceContent: |
-          {
-            "version": "0.2.0",
-              "configurations": [
-                 {
-                    "type": "netcoredbg",
-                    "request": "launch",
-                    "program": "/projects/Onbowman.MSOA.IdentityGateway/bin/Debug/net5.0/Onbowman.MSOA.IdentityGateway.dll",
-                    "args": [],
-                    "name": ".NET Core Launch (console)",
-                    "stopAtEntry": true,
-                    "preLaunchTask": "2. Build",
-                    "console": "internalConsole"
-                  }
-              ]
-          }
+- id: build
+  exec:
+    workingDir: ${PROJECT_SOURCE}/Onbowman.MSOA.IdentityGateway
+    commandLine: kill $(pidof dotnet); dotnet build -c $CONFIGURATION $STARTUP_PROJECT /p:UseSharedCompilation=false
+    component: dotnet
+    group:
+      isDefault: true
+      kind: build
+
+- id: run
+  exec:
+    workingDir: ${PROJECT_SOURCE}/Onbowman.MSOA.IdentityGateway
+    commandLine: dotnet run -c $CONFIGURATION --no-build --project $STARTUP_PROJECT --no-launch-profile
+    component: dotnet
+    group:
+      isDefault: true
+      kind: run
