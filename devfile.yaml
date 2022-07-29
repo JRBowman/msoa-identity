@@ -1,64 +1,45 @@
-apiVersion: 1.0.0
+schemaVersion: 2.1.0
 metadata:
-  generateName: dotnet-
+  name: dotnet
+  namespace: justin-onbowman-com-codeready-8puzzf
 projects:
-  - name: dotnet-api
-    source:
-      type: git
-      location: 'https://dev.azure.com/bowman-redhat/dotnet-msoa/_git/identity-gateway'
+  - git:
+      remotes:
+        origin: 'https://dev.azure.com/bowman-redhat/dotnet-msoa/_git/identity-gateway'
+    name: dotnet-api
 components:
-  - type: chePlugin
-    alias: omnisharp
-    id: redhat-developer/che-omnisharp-plugin/latest
-  - type: chePlugin
-    alias: netcoredbg
-    id: redhat-developer/netcoredbg-theia-plugin/latest
-  - type: dockerimage
-    alias: dotnet
-    image: 'registry.redhat.io/codeready-workspaces/stacks-dotnet-rhel8@sha256:60007e969d7e3dbc526f3be6b5ebb6aadac9018448c6f2d967ade8400d158531'
-    memoryLimit: 512Mi
-    endpoints:
-      - name: main-endpoint
-        port: 5000
-    mountSources: true
-    volumes:
-      - name: nuget
-        containerPath: /home/jboss/.nuget
+  - container:
+      endpoints:
+        - exposure: public
+          name: main-endpoint
+          protocol: http
+          targetPort: 5000
+      image: 'registry.redhat.io/codeready-workspaces/stacks-dotnet-rhel8@sha256:60007e969d7e3dbc526f3be6b5ebb6aadac9018448c6f2d967ade8400d158531'
+      memoryLimit: 512Mi
+      mountSources: true
+      sourceMapping: /projects
+      volumeMounts:
+        - name: nuget
+          path: /home/jboss/.nuget
+    name: dotnet
+  - name: nuget
+    volume: {}
 commands:
-  - name: 1. Update dependencies
-    actions:
-      - type: exec
-        component: dotnet
-        command: dotnet restore
-        workdir: '${CHE_PROJECTS_ROOT}/Onbowman.MSOA.IdentityGateway'
-  - name: 2. Build
-    actions:
-      - type: exec
-        component: dotnet
-        command: dotnet build
-        workdir: '${CHE_PROJECTS_ROOT}/Onbowman.MSOA.IdentityGateway'
-  - name: 3. Run
-    actions:
-      - type: exec
-        component: dotnet
-        command: dotnet run
-        workdir: '${CHE_PROJECTS_ROOT}/Onbowman.MSOA.IdentityGateway'
-  - name: Launch .net web application in debug mode
-    actions:
-      - type: vscode-launch
-        referenceContent: |
-          {
-            "version": "0.2.0",
-              "configurations": [
-                 {
-                    "type": "netcoredbg",
-                    "request": "launch",
-                    "program": "/projects/Onbowman.MSOA.IdentityGateway/bin/Debug/net5.0/Onbowman.MSOA.IdentityGateway.dll",
-                    "args": [],
-                    "name": ".NET Core Launch (console)",
-                    "stopAtEntry": true,
-                    "preLaunchTask": "2. Build",
-                    "console": "internalConsole"
-                  }
-              ]
-          }
+  - exec:
+      commandLine: dotnet restore
+      component: dotnet
+      label: 1. Update dependencies
+      workingDir: '${PROJECTS_ROOT}/Onbowman.MSOA.IdentityGateway'
+    id: update-dependencies
+  - exec:
+      commandLine: dotnet build
+      component: dotnet
+      label: 2. Build
+      workingDir: '${PROJECTS_ROOT}/Onbowman.MSOA.IdentityGateway'
+    id: build
+  - exec:
+      commandLine: dotnet run
+      component: dotnet
+      label: 3. Run
+      workingDir: '${PROJECTS_ROOT}/Onbowman.MSOA.IdentityGateway'
+    id: run
