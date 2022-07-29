@@ -9,7 +9,6 @@ metadata:
   tags:
     - dotnet
   version: 1.0.1
-
 projects:
   - name: dotnet-identity
     git:
@@ -18,7 +17,6 @@ projects:
         revision: main
       remotes:
         origin: https://dev.azure.com/bowman-redhat/dotnet-msoa/_git/identity-gateway
-
 components:
 - name: dotnet
   container:
@@ -45,7 +43,6 @@ commands:
     group:
       isDefault: true
       kind: build
-
 - id: run
   exec:
     workingDir: ${PROJECT_SOURCE}/Onbowman.MSOA.IdentityGateway
